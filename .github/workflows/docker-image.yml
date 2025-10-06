@@ -1,0 +1,39 @@
+name: Mirror devlikeapro/waha to chk07/whatsapp
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'  # every Sunday 3AM UTC
+  workflow_dispatch:      # manual trigger option
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Pull upstream image
+        run: docker pull devlikeapro/waha:latest
+
+      - name: Pull upstream image:arm
+        run: docker pull devlikeapro/waha:arm
+
+      - name: Retag for your repo
+        run: docker tag devlikeapro/waha:latest chk07/whatsapp:latest
+
+      - name: Retag for your repo:arm
+        run: docker tag devlikeapro/waha:arm chk07/whatsapp:arm
+
+      - name: Push to your repo
+        run: docker push chk07/whatsapp:latest
+
+      - name: Push to your repo
+        run: docker push chk07/whatsapp:arm
+
+      - name: Print success message
+        run: echo "✅ Successfully mirrored devlikeapro/waha → chk07/whatsapp"
